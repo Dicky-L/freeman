@@ -1,0 +1,17 @@
+[project]
+name = "ai-pipeline-reliability-lab"
+version = "0.1.0"
+description = "Production-hardening patterns for async LLM/data pipelines"
+requires-python = ">=3.11"
+dependencies = [
+  "pydantic>=2.9,<3",
+]
+
+[project.optional-dependencies]
+gemini = ["google-genai>=1.50"]
+dev = ["pytest>=8", "pytest-asyncio>=0.24"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+testpaths = ["tests"]

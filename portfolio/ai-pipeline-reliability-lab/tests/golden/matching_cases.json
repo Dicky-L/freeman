@@ -1,0 +1,42 @@
+[
+  {
+    "name": "perfect match",
+    "profile": {
+      "caregiver_id": "cg-1",
+      "full_name": "Ana Tan",
+      "date_of_birth": "1986-02-14",
+      "languages": ["English", "Mandarin"],
+      "skills": ["dementia", "mobility"],
+      "years_experience": 8,
+      "availability_hours_per_week": 40,
+      "summary": ""
+    },
+    "request": {
+      "required_languages": ["English", "Mandarin"],
+      "required_skills": ["dementia", "mobility"],
+      "min_years_experience": 5,
+      "min_hours_per_week": 40
+    },
+    "expected_total": 100.0
+  },
+  {
+    "name": "partial but deterministic match",
+    "profile": {
+      "caregiver_id": "cg-2",
+      "full_name": "Ben Lee",
+      "date_of_birth": "1992-05-01",
+      "languages": ["English"],
+      "skills": ["mobility"],
+      "years_experience": 3,
+      "availability_hours_per_week": 20,
+      "summary": ""
+    },
+    "request": {
+      "required_languages": ["English", "Mandarin"],
+      "required_skills": ["dementia", "mobility"],
+      "min_years_experience": 6,
+      "min_hours_per_week": 40
+    },
+    "expected_total": 50.0
+  }
+]
