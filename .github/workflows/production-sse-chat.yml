@@ -1,0 +1,28 @@
+name: Production SSE Chat CI
+
+on:
+  push:
+    paths:
+      - 'portfolio/production-fastapi-sse-llm-chat/**'
+      - '.github/workflows/production-sse-chat.yml'
+  pull_request:
+    paths:
+      - 'portfolio/production-fastapi-sse-llm-chat/**'
+      - '.github/workflows/production-sse-chat.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portfolio/production-fastapi-sse-llm-chat
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: portfolio/production-fastapi-sse-llm-chat/pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+      - run: pytest -q

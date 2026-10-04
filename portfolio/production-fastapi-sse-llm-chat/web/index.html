@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Production SSE Chat Demo</title>
+  <style>
+    body { font: 16px/1.5 system-ui, sans-serif; max-width: 820px; margin: 40px auto; padding: 0 20px; }
+    textarea { width: 100%; min-height: 110px; box-sizing: border-box; }
+    button { margin: 12px 8px 12px 0; padding: 8px 14px; }
+    pre { white-space: pre-wrap; background: #f5f5f5; padding: 16px; min-height: 120px; }
+    #status { font-family: ui-monospace, monospace; }
+  </style>
+</head>
+<body>
+  <h1>FastAPI + SSE LLM Chat</h1>
+  <p>POST SSE over <code>fetch()</code>, with AbortController cancellation.</p>
+  <textarea id="message">Explain why SSE proxy buffering breaks token streaming.</textarea>
+  <div>
+    <button id="send">Send</button>
+    <button id="stop">Stop</button>
+  </div>
+  <div id="status">idle</div>
+  <pre id="output"></pre>
+
+<script>
+let controller;
+
+function parseFrame(frame) {
+  let event = "message";
+  const data = [];
+  for (const rawLine of frame.split("\n")) {
+    const line = rawLine.replace(/\r$/, "");
+    if (!line || line.startsWith(":")) continue;
+    if (line.startsWith("event:")) event = line.slice(6).trim();
+    if (line.startsWith("data:")) data.push(line.slice(5).trimStart());
+  }
+  return { event, data: data.join("\n") };
+}
+
+async function streamChat() {
+  controller?.abort();
+  controller = new AbortController();
+  const output = document.querySelector("#output");
+  const status = document.querySelector("#status");
+  output.textContent = "";
+  status.textContent = "connecting";
+
+  try {
+    const response = await fetch("/v1/chat/stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: document.querySelector("#message").value }),
+      signal: controller.signal,
+    });
+    if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+
+    const requestId = response.headers.get("x-request-id");
+    status.textContent = `streaming request=${requestId}`;
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+      let boundary;
+      while ((boundary = buffer.indexOf("\n\n")) >= 0) {
+        const frame = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
+        const parsed = parseFrame(frame);
+        if (!parsed.data) continue;
+        const data = JSON.parse(parsed.data);
+        if (parsed.event === "delta") output.textContent += data.text;
+        if (parsed.event === "done") status.textContent = "done";
+        if (parsed.event === "error") status.textContent = `error: ${data.code}`;
+      }
+    }
+  } catch (error) {
+    status.textContent = error.name === "AbortError" ? "cancelled by client" : String(error);
+  }
+}
+
+document.querySelector("#send").addEventListener("click", streamChat);
+document.querySelector("#stop").addEventListener("click", () => controller?.abort());
+</script>
+</body>
+</html>
