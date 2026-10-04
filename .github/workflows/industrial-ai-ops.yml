@@ -1,0 +1,28 @@
+name: Industrial AI Ops CI
+
+on:
+  push:
+    paths:
+      - 'portfolio/industrial-ai-ops-platform/**'
+      - '.github/workflows/industrial-ai-ops.yml'
+  pull_request:
+    paths:
+      - 'portfolio/industrial-ai-ops-platform/**'
+      - '.github/workflows/industrial-ai-ops.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: portfolio/industrial-ai-ops-platform
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: portfolio/industrial-ai-ops-platform/pyproject.toml
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+      - run: pytest -q

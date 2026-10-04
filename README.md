@@ -4,6 +4,6 @@ independent and free
 
 ## Engineering portfolio
 
-- [AI Pipeline Reliability Lab](portfolio/ai-pipeline-reliability-lab/README.md) — Python async LLM/data pipeline hardening: strict structured output, retry/fallback, idempotency, deterministic scoring, observability, golden-file tests, and PostgreSQL production patterns.
+- [Industrial AI Operations Platform](portfolio/industrial-ai-ops-platform/README.md) — an AI-enhanced industrial event/workflow system built from patterns I have worked with in enterprise and industrial software: event ingestion, deterministic rules, task-center integration, data freshness, traceability, retries, structured LLM output and fault isolation.
 
-> Portfolio code is written as reviewable demonstrations of engineering patterns. It is not presented as code copied from previous clients.
+> Portfolio implementations demonstrate reusable engineering patterns. They do not contain employer/client source code or private business data.

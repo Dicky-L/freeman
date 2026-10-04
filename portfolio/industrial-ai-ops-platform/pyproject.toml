@@ -1,15 +1,16 @@
 [project]
-name = "ai-pipeline-reliability-lab"
+name = "industrial-ai-ops-platform"
 version = "0.1.0"
-description = "Production-hardening patterns for async LLM/data pipelines"
+description = "Industrial event, workflow and AI enrichment reliability demo"
 requires-python = ">=3.11"
 dependencies = [
+  "fastapi>=0.115,<1",
   "pydantic>=2.9,<3",
 ]
 
 [project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "httpx>=0.27"]
 gemini = ["google-genai>=1.50"]
-dev = ["pytest>=8", "pytest-asyncio>=0.24"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
