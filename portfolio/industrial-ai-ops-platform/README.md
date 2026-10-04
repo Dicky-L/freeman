@@ -1,3 +1,5 @@
+[中文版](README.zh-CN.md)
+
 # Industrial AI Operations Platform
 
 A compact reference project for **industrial event processing + workflow integration + AI enrichment**.
