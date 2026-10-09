@@ -1,0 +1,71 @@
+name: A-share five year study
+on:
+  pull_request:
+    paths:
+      - 'portfolio/ashare-5y-backtest/**'
+      - '.github/workflows/ashare-5y-backtest.yml'
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Study scope'
+        type: choice
+        options: [full, pilot]
+        default: full
+permissions:
+  contents: read
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r portfolio/ashare-5y-backtest/requirements.txt
+      - run: cd portfolio/ashare-5y-backtest && python -m unittest discover -s tests -v
+  fetch-study:
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -r portfolio/ashare-5y-backtest/requirements.txt
+      - run: |
+          cd portfolio/ashare-5y-backtest
+          python backtest.py --scope ${{ inputs.scope || 'full' }} --shards 8 --shard-index ${{ matrix.shard }} --output $GITHUB_WORKSPACE/results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shard-${{ matrix.shard }}
+          path: results
+          if-no-files-found: warn
+  combine:
+    needs: fetch-study
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install pandas numpy
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: shard-*
+          path: collected
+      - run: python portfolio/ashare-5y-backtest/combine.py collected
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: study-report
+          path: |
+            report.json
+            REPORT.md
+            top10_signals.csv
