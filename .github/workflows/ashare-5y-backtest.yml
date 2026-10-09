@@ -23,8 +23,18 @@ jobs:
           python-version: '3.11'
       - run: pip install -r portfolio/ashare-5y-backtest/requirements.txt
       - run: cd portfolio/ashare-5y-backtest && python -m unittest discover -s tests -v
-  fetch-study:
+  connectivity-test:
     needs: unit-tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install baostock pandas
+      - run: python portfolio/ashare-5y-backtest/probe.py
+  fetch-study:
+    needs: connectivity-test
     runs-on: ubuntu-latest
     timeout-minutes: 240
     strategy:
@@ -48,7 +58,6 @@ jobs:
           if-no-files-found: warn
   combine:
     needs: fetch-study
-    if: always()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
